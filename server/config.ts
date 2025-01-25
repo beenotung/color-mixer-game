@@ -23,8 +23,9 @@ export let config = {
   development,
   minify: production,
   site_name: 'Color Mixer Game',
-  short_site_name: 'CMG',
-  site_description: 'Demo website of ts-liveview',
+  short_site_name: 'Color Mixer',
+  site_description:
+    'In each level, you have to mix two colors to match the target color.',
   setup_robots_txt: false,
   epoch,
   auto_open: !production && development && epoch === 1,

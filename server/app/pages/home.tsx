@@ -32,9 +32,9 @@ let content = (
 
     <p>
       <Locale
-        en="In each level, you have to mix the color to match the target color."
-        zh_hk="在每個關卡中，你需要混合顏色以匹配目標顏色。"
-        zh_cn="在每个关卡中，你需要混合颜色以匹配目标颜色。"
+        en="In each level, you have to mix the existing colors to match the target color."
+        zh_hk="在每個關卡中，你需要混合現有的顏色以匹配目標顏色。"
+        zh_cn="在每个关卡中，你需要混合现有的颜色以匹配目标颜色。"
       />
     </p>
 
