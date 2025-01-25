@@ -15,6 +15,7 @@ import { renderError } from '../components/error.js'
 import { getAuthUser } from '../auth/user.js'
 import { Script } from '../components/script.js'
 import { Locale } from '../components/locale.js'
+import { EarlyTerminate } from '../../exception.js'
 
 let pageTitle = 'Play'
 let addPageTitle = 'Add Play'
@@ -23,9 +24,15 @@ let style = Style(/* css */ `
 #Play {
 
 }
+#targetContainer {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
 #colorPanel {
   display: flex;
   gap: 1rem;
+  flex-wrap: wrap;
 }
 .color--cell {
   outline: 1px solid black;
@@ -41,7 +48,7 @@ let style = Style(/* css */ `
 }
 #mixedColor {
 }
-#mixedColorText {
+.color--label {
   font-size: 1.5rem;
   color: #000000;
   background-color: #ffffff;
@@ -51,6 +58,10 @@ let style = Style(/* css */ `
   display: flex;
   align-items: center;
   justify-content: center;
+}
+.btn {
+  font-size: 1.25rem;
+  margin-top: 0.5rem;
 }
 `)
 
@@ -115,7 +126,7 @@ let colors: string[] = [
   'rgb(0, 0, 0)',
 ]
 
-let target_color = pickRandomTargetColor()
+let target = pickRandomTargetColor()
 
 function parseColor(text: string) {
   // e.g. "rgb(255, 0, 0)"
@@ -152,7 +163,7 @@ function pickRandomTargetColor() {
     if (aColor == bColor) continue
     let cColor = mixColor(aColor, bColor)
     if (colors.includes(cColor)) continue
-    return cColor
+    return { aColor, bColor, cColor }
   }
   throw 'Failed to pick random target color'
 }
@@ -164,12 +175,22 @@ function Main(attrs: {}, context: Context) {
       <h3>
         <Locale en="Target Color" zh_hk="目標顏色" zh_cn="目标颜色" />
       </h3>
-      <div
-        id="targetColor"
-        class="color--cell"
-        style={`background-color: ${target_color}`}
-      ></div>
-      <button>
+      <div id="targetContainer">
+        <div
+          id="targetColor"
+          class="color--cell"
+          style={`background-color: ${target.cColor}`}
+        ></div>
+        <span>=</span>
+        <div id="aColor" class="color--cell">
+          <span class="color--label">?</span>
+        </div>
+        <span>+</span>
+        <div id="bColor" class="color--cell">
+          <span class="color--label">?</span>
+        </div>
+      </div>
+      <button class="btn" onclick="emit('/play/hint')">
         <Locale en="Hint" zh_hk="提示" zh_cn="提示" />
       </button>
       <h3>
@@ -188,7 +209,9 @@ function Main(attrs: {}, context: Context) {
         <Locale en="Mixed Color" zh_hk="混合顏色" zh_cn="混合颜色" />
       </h3>
       <div id="mixedColor" class="color--cell">
-        <span id="mixedColorText">?</span>
+        <span id="mixedColorText" class="color--label">
+          ?
+        </span>
       </div>
     </>
   )
@@ -198,6 +221,19 @@ let submitParser = object({
   aColor: string(),
   bColor: string(),
 })
+
+function Hint(attrs: {}, context: DynamicContext) {
+  if (context.type != 'ws') {
+    throw 'This endpoint is only available via websocket'
+  }
+  let hint = Math.random() < 0.5 ? target.aColor : target.bColor
+  context.ws.send([
+    'update-attrs',
+    '#aColor',
+    { style: `background-color: ${hint}` },
+  ])
+  throw EarlyTerminate
+}
 
 function Submit(attrs: {}, context: DynamicContext) {
   try {
@@ -217,13 +253,13 @@ function Submit(attrs: {}, context: DynamicContext) {
     }
 
     let cColor = mixColor(input.aColor, input.bColor)
-    if (cColor != target_color) {
-      throw `Mixed color ${cColor} does not match target color ${target_color}`
+    if (cColor != target.cColor) {
+      throw `Mixed color ${cColor} does not match target color ${target.cColor}`
     }
 
-    colors.push(target_color)
+    colors.push(target.cColor)
 
-    target_color = pickRandomTargetColor()
+    target = pickRandomTargetColor()
 
     return <Redirect href={`/play`} />
   } catch (error) {
@@ -263,9 +299,15 @@ let routes = {
       }
     },
   },
+  '/play/hint': {
+    title: apiEndpointTitle,
+    description: 'Get a hint to match the target color',
+    node: <Hint />,
+    streaming: false,
+  },
   '/play/submit': {
     title: apiEndpointTitle,
-    description: 'TODO',
+    description: 'Submit two colors to match the target color',
     node: <Submit />,
     streaming: false,
   },
