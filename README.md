@@ -12,6 +12,9 @@ https://color-mix.hkit.cc
 Live Coding Video:
 https://youtube.com/live/ULzVRmtWo3U
 
+Source Code:
+https://github.com/beenotung/make-a-language
+
 Powered by [ts-liveview](https://github.com/beenotung/ts-liveview/blob/v5-auth-web-template/README.md)
 
 See [help.txt](help.txt) to get started.
