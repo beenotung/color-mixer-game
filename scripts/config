@@ -1,0 +1,4 @@
+user=node
+host=color-mixer-game.cc
+root_dir=/home/node/workspace/github.com/beenotung/color-mixer-game
+pm2_name="color-mixer-game"
