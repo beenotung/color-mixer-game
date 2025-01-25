@@ -14,6 +14,7 @@ import { Link, Redirect } from '../components/router.js'
 import { renderError } from '../components/error.js'
 import { getAuthUser } from '../auth/user.js'
 import { Script } from '../components/script.js'
+import { Locale } from '../components/locale.js'
 
 let pageTitle = 'Play'
 let addPageTitle = 'Add Play'
@@ -97,7 +98,9 @@ let page = (
   <>
     {style}
     <div id="Play">
-      <h1>{pageTitle}</h1>
+      <h1>
+        <Locale en="Game Room" zh_hk="遊戲室" zh_cn="游戏室" />
+      </h1>
       <Main />
     </div>
     {script}
@@ -158,13 +161,20 @@ function Main(attrs: {}, context: Context) {
   let user = getAuthUser(context)
   return (
     <>
-      <h3>Target Color</h3>
+      <h3>
+        <Locale en="Target Color" zh_hk="目標顏色" zh_cn="目标颜色" />
+      </h3>
       <div
         id="targetColor"
         class="color--cell"
         style={`background-color: ${target_color}`}
       ></div>
-      <h3>Color Panel</h3>
+      <button>
+        <Locale en="Hint" zh_hk="提示" zh_cn="提示" />
+      </button>
+      <h3>
+        <Locale en="Color Panel" zh_hk="顏色面板" zh_cn="颜色面板" />
+      </h3>
       <div id="colorPanel">
         {mapArray(colors, color => (
           <div
@@ -174,7 +184,9 @@ function Main(attrs: {}, context: Context) {
           ></div>
         ))}
       </div>
-      <h3>Mixed Color</h3>
+      <h3>
+        <Locale en="Mixed Color" zh_hk="混合顏色" zh_cn="混合颜色" />
+      </h3>
       <div id="mixedColor" class="color--cell">
         <span id="mixedColorText">?</span>
       </div>
@@ -226,10 +238,30 @@ function Submit(attrs: {}, context: DynamicContext) {
 
 let routes = {
   '/play': {
-    title: title(pageTitle),
-    description: 'TODO',
     menuText: pageTitle,
-    node: page,
+    resolve(context) {
+      let t = Locale(
+        {
+          en: 'Game Room',
+          zh_hk: '遊戲室',
+          zh_cn: '游戏室',
+        },
+        context,
+      )
+      let description = Locale(
+        {
+          en: 'Mix two colors to match the target color',
+          zh_hk: '混合兩個顏色以匹配目標顏色',
+          zh_cn: '混合两个颜色以匹配目标颜色',
+        },
+        context,
+      )
+      return {
+        title: title(t),
+        description: description,
+        node: page,
+      }
+    },
   },
   '/play/submit': {
     title: apiEndpointTitle,
