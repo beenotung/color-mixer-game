@@ -120,10 +120,41 @@ let page = (
   </>
 )
 
-let colors: string[] = proxy.color.map(row => row.css)
+let colors: string[] = loadColors().map(row => row.css)
+
 colors.splice(colors.length - 1, 1)
+{
+  let last = colors[colors.length - 1]
+  let color = find(proxy.color, { css: last })
+  if (color) {
+    let mix = find(proxy.color_mix, { c_color_id: color.id! })
+    if (mix) {
+      colors.push(mix.a_color!.css)
+      colors.push(mix.b_color!.css)
+    }
+  }
+}
 
 let target = pickRandomTargetColor()
+
+function loadColors() {
+  let colors = proxy.color.slice()
+
+  let last = colors[colors.length - 1]
+  if (!last) return colors
+
+  let mix = find(proxy.color_mix, { c_color_id: last.id! })
+  // include all base colors
+  if (!mix) return colors
+
+  if (!mix.user_id) {
+    // skip last non mixed color
+    return colors.slice(0, -1)
+  }
+
+  // include all mixed colors
+  return colors
+}
 
 function parseColor(text: string) {
   // e.g. "rgb(255, 0, 0)"
