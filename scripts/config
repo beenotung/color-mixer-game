@@ -1,4 +1,4 @@
 user=node
-host=color-mixer-game.cc
+host=color-mix.hkit.cc
 root_dir=/home/node/workspace/github.com/beenotung/color-mixer-game
 pm2_name="color-mixer-game"
