@@ -1,3 +1,4 @@
+import LeaderBoard from './pages/leader-board.js'
 import Play from './pages/play.js'
 import { capitalize } from '@beenotung/tslib/string.js'
 import { Router } from 'url-router.ts'
@@ -72,6 +73,7 @@ export type Routes = Record<string, PageRoute>
 
 // TODO direct support alternative urls instead of having to repeat the entry
 let routeDict = {
+  ...LeaderBoard.routes,
   ...Play.routes,
   ...Home.routes,
   ...DemoPlugin.routes,
