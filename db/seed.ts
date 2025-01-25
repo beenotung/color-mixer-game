@@ -5,11 +5,10 @@ import { proxy } from './proxy'
 //
 // You can setup the database with initial config and sample data via the db proxy.
 
-seedRow(proxy.method, { method: 'GET' })
-seedRow(proxy.method, { method: 'POST' })
-seedRow(proxy.method, { method: 'ws' })
-
-console.log(
-  'request methods:',
-  proxy.method.map(row => row.method),
-)
+if (proxy.color.length == 0) {
+  seedRow(proxy.color, { css: 'rgb(255, 255, 255)' })
+  seedRow(proxy.color, { css: 'rgb(255, 0, 0)' })
+  seedRow(proxy.color, { css: 'rgb(0, 255, 0)' })
+  seedRow(proxy.color, { css: 'rgb(0, 0, 255)' })
+  seedRow(proxy.color, { css: 'rgb(0, 0, 0)' })
+}

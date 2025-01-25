@@ -1,3 +1,4 @@
+import { find } from 'better-sqlite3-proxy'
 import { o } from '../jsx/jsx.js'
 import { Routes } from '../routes.js'
 import { apiEndpointTitle, title } from '../../config.js'
@@ -16,6 +17,7 @@ import { getAuthUser } from '../auth/user.js'
 import { Script } from '../components/script.js'
 import { Locale } from '../components/locale.js'
 import { EarlyTerminate } from '../../exception.js'
+import { proxy } from '../../../db/proxy.js'
 
 let pageTitle = 'Play'
 let addPageTitle = 'Add Play'
@@ -118,13 +120,8 @@ let page = (
   </>
 )
 
-let colors: string[] = [
-  'rgb(255, 255, 255)',
-  'rgb(255, 0, 0)',
-  'rgb(0, 255, 0)',
-  'rgb(0, 0, 255)',
-  'rgb(0, 0, 0)',
-]
+let colors: string[] = proxy.color.map(row => row.css)
+colors.splice(colors.length - 1, 1)
 
 let target = pickRandomTargetColor()
 
@@ -156,13 +153,26 @@ function pickRandomColor() {
 }
 
 function pickRandomTargetColor() {
+  let mix = find(proxy.color_mix, { user_id: null })
+  if (mix) {
+    return {
+      aColor: mix.a_color!.css,
+      bColor: mix.b_color!.css,
+      cColor: mix.c_color!.css,
+    }
+  }
   for (let i = 0; i < 1000; i++) {
     let aColor = pickRandomColor()
     let bColor = pickRandomColor()
-    console.log('pickRandomTargetColor', { aColor, bColor })
     if (aColor == bColor) continue
     let cColor = mixColor(aColor, bColor)
     if (colors.includes(cColor)) continue
+    proxy.color_mix.push({
+      a_color_id: find(proxy.color, { css: aColor })!.id!,
+      b_color_id: find(proxy.color, { css: bColor })!.id!,
+      c_color_id: proxy.color.push({ css: cColor }),
+      user_id: null,
+    })
     return { aColor, bColor, cColor }
   }
   throw 'Failed to pick random target color'
@@ -240,8 +250,8 @@ function Submit(attrs: {}, context: DynamicContext) {
     if (context.type != 'ws') {
       throw 'This endpoint is only available via websocket'
     }
-    // let user = getAuthUser(context)
-    // if (!user) throw 'You must be logged in to submit ' + pageTitle
+    let user = getAuthUser(context)
+    if (!user) throw 'You must be logged in to submit color'
 
     let input = submitParser.parse(context.args?.[0])
 
@@ -256,6 +266,18 @@ function Submit(attrs: {}, context: DynamicContext) {
     if (cColor != target.cColor) {
       throw `Mixed color ${cColor} does not match target color ${target.cColor}`
     }
+
+    let c_color_row = find(proxy.color, { css: cColor })
+    if (!c_color_row) {
+      throw `Failed to find c_color_row for ${cColor}`
+    }
+
+    let mix = find(proxy.color_mix, { c_color_id: c_color_row.id! })
+    if (!mix) {
+      throw `Failed to find mix for ${cColor}`
+    }
+
+    mix.user_id = user.id!
 
     colors.push(target.cColor)
 

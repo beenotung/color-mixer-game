@@ -92,6 +92,23 @@ export type VerificationCode = {
   user?: User
 }
 
+export type Color = {
+  id?: null | number
+  css: string
+}
+
+export type ColorMix = {
+  id?: null | number
+  a_color_id: number
+  a_color?: Color
+  b_color_id: number
+  b_color?: Color
+  c_color_id: number
+  c_color?: Color
+  user_id: null | number
+  user?: User
+}
+
 export type DBProxy = {
   method: Method[]
   url: Url[]
@@ -104,6 +121,8 @@ export type DBProxy = {
   request_log: RequestLog[]
   verification_attempt: VerificationAttempt[]
   verification_code: VerificationCode[]
+  color: Color[]
+  color_mix: ColorMix[]
 }
 
 export let proxy = proxySchema<DBProxy>({
@@ -133,6 +152,14 @@ export let proxy = proxySchema<DBProxy>({
     verification_code: [
       /* foreign references */
       ['match', { field: 'match_id', table: 'verification_attempt' }],
+      ['user', { field: 'user_id', table: 'user' }],
+    ],
+    color: [],
+    color_mix: [
+      /* foreign references */
+      ['a_color', { field: 'a_color_id', table: 'color' }],
+      ['b_color', { field: 'b_color_id', table: 'color' }],
+      ['c_color', { field: 'c_color_id', table: 'color' }],
       ['user', { field: 'user_id', table: 'user' }],
     ],
   },
