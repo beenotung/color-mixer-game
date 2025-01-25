@@ -123,10 +123,15 @@ function parseColor(text: string) {
 function mixColor(aColor: string, bColor: string) {
   let aValues = parseColor(aColor)
   let bValues = parseColor(bColor)
+  // let cValues = [
+  //   Math.min(255, aValues[0] + bValues[0]),
+  //   Math.min(255, aValues[1] + bValues[1]),
+  //   Math.min(255, aValues[2] + bValues[2]),
+  // ]
   let cValues = [
-    Math.min(255, aValues[0] + bValues[0]),
-    Math.min(255, aValues[1] + bValues[1]),
-    Math.min(255, aValues[2] + bValues[2]),
+    Math.floor((aValues[0] + bValues[0]) / 2),
+    Math.floor((aValues[1] + bValues[1]) / 2),
+    Math.floor((aValues[2] + bValues[2]) / 2),
   ]
   return 'rgb(' + cValues.join(', ') + ')'
 }
